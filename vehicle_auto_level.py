@@ -172,12 +172,13 @@ class VehicleAutoLevel:
                 "min_mask_coverage": ("FLOAT", {"default": 0.15, "min": 0.001, "max": 0.9, "step": 0.01}),
                 "min_confidence": ("FLOAT", {"default": 0.35, "min": 0.0, "max": 1.0, "step": 0.01}),
                 "manual_angle_offset": ("FLOAT", {"default": 0.0, "min": -10.0, "max": 10.0, "step": 0.1}),
+                "invert_estimated_angle": ("BOOLEAN", {"default": True}),
                 "auto_crop_to_content": ("BOOLEAN", {"default": True}),
             }
         }
 
     RETURN_TYPES = ("IMAGE", "FLOAT", "FLOAT")
-    RETURN_NAMES = ("image", "angle_deg", "confidence")
+    RETURN_NAMES = ("image", "applied_angle_deg", "confidence")
     FUNCTION = "run"
     CATEGORY = "Autobook/vehicle"
 
@@ -190,6 +191,7 @@ class VehicleAutoLevel:
         min_mask_coverage=0.15,
         min_confidence=0.35,
         manual_angle_offset=0.0,
+        invert_estimated_angle=True,
         auto_crop_to_content=True,
     ):
         batch = _tensor_to_numpy(image)
@@ -209,7 +211,8 @@ class VehicleAutoLevel:
             else:
                 est_angle, confidence = _estimate_bottom_profile_angle(mask, trim_side_fraction)
                 est_angle = max(-max_correction_degrees, min(max_correction_degrees, est_angle))
-                correction = est_angle + float(manual_angle_offset)
+                correction_base = (-est_angle) if invert_estimated_angle else est_angle
+                correction = correction_base + float(manual_angle_offset)
 
                 if confidence < min_confidence and abs(manual_angle_offset) < 1e-4:
                     correction = 0.0

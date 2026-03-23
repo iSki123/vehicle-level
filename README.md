@@ -1,23 +1,15 @@
-# Vehicle Auto Level custom node for ComfyUI
 
-This custom node estimates roll/tilt from the cropped vehicle cutout and rotates the vehicle automatically before the rest of the composite chain.
+# Vehicle Auto Level v2
 
-## What it does
-- Builds a vehicle mask from alpha when available, otherwise falls back to border-difference masking
-- Estimates tilt from the bottom profile of the vehicle cutout
-- Rotates the vehicle by the estimated correction angle
-- Optionally crops back to the content after rotation
+This revision fixes the most common failure mode from v1: applying the estimated tilt in the wrong direction.
 
-## Install
-Copy `vehicle_auto_level.py` into:
-`ComfyUI/custom_nodes/vehicle_auto_level_pack/`
+## What changed
+- Added `invert_estimated_angle` boolean and set it to default `True`.
+- Output angle is now the applied correction angle.
 
-Then restart ComfyUI.
-
-## Recommended defaults
-- `max_correction_degrees`: 7.0
-- `trim_side_fraction`: 0.18
-- `min_confidence`: 0.35
-
-## Notes
-This is a heuristic. It is best for mild roll/tilt correction on dealer photos. It will not fully solve camera-perspective mismatch.
+## Recommended settings
+- max_correction_degrees: 4.0 to 6.0
+- trim_side_fraction: 0.22 to 0.28 for cars
+- min_confidence: 0.45
+- invert_estimated_angle: True
+- manual_angle_offset: use ±0.5 to ±2.0 only if needed
